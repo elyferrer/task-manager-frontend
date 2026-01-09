@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { getTasks, createTask } from './taskSlice';
+import { getTasks, createTask, deleteTask } from './taskSlice';
 import { StatusEnums } from '../../app/enums/status';
 
 const TaskForm = () => {
@@ -23,6 +23,10 @@ const TaskForm = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         dispatch(createTask(formData))
+    }
+
+    const handleDelete = (id) => {
+        dispatch(deleteTask(id));
     }
     
     useEffect(() => {
@@ -55,6 +59,7 @@ const TaskForm = () => {
                             <div>{ task.start_date }</div>
                             <div>{ task.end_date }</div>
                             <div>{ StatusEnums.filter((st) => st.value === task.status).map(stat => stat.desc) }</div>
+                            <button onClick={ () => handleDelete(task._id) }>Delete</button>
                         </div>
                     )) : 'No Tasks'
             }

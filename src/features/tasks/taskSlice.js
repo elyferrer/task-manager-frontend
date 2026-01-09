@@ -33,16 +33,33 @@ export const createTask = createAsyncThunk(
   }
 )
 
+export const deleteTask = createAsyncThunk(
+  'user/deleteTask',
+  async (id, thunkAPI) => {
+    try {
+        const response = await axios.delete(`${API_URL}/tasks/${id}`, { withCredentials: true });
+        
+        return response.data;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.response.data)
+    }
+  }
+)
+
 export const taskSlice = createSlice({
   name: 'task',
   initialState,
   reducers: {},
   extraReducers: (builder) => {
       builder.addCase(getTasks.fulfilled, (state, action) => {
-          state.data = action.payload;
+        state.data = action.payload;
       }),
       builder.addCase(createTask.fulfilled, (state, action) => {
-          state.data.push(action.payload);
+        state.data.push(action.payload);
+      }),
+      builder.addCase(deleteTask.fulfilled, (state, action) => {
+        console.log(action.payload._id);
+        state.data = state.data.filter(task => task._id.toString() !== action.payload._id);
       })
   }
 })
