@@ -28,7 +28,7 @@ export const createTask = createAsyncThunk(
       title: formData.title,
       details: formData.details,
       start_date: `${formData.start_date} ${formData.start_time}`,
-      end_date: `${formData.start_date} ${formData.end_time}`,
+      end_date: `${formData.end_date} ${formData.end_time}`,
       status: formData.status
     };
 
@@ -96,8 +96,5 @@ export const taskSlice = createSlice({
       })
   }
 })
-
-// Action creators are generated for each case reducer function
-// export const { create, update, remove } = taskSlice.actions
 
 export default taskSlice.reducer

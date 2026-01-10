@@ -93,6 +93,18 @@ export const logout = createAsyncThunk(
     }
 );
 
+export const deleteUser = createAsyncThunk(
+    'user/delete',
+    async (id, thunkAPI) => {
+        try {
+            await axios.delete(`${API_URL}/user/delete`, { withCredentials: true });
+            localStorage.clear();
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error.response.data)
+        }
+    }
+);
+
 export const userSlice = createSlice({
     name: 'user',
     initialState,
@@ -100,6 +112,9 @@ export const userSlice = createSlice({
     extraReducers: (builder) => {
         builder.addCase(register.fulfilled, (state) => {
             state.loggedIn = true;
+        }),
+        builder.addCase(register.rejected, (state, action) => {
+            state.error = action.payload
         }),
         builder.addCase(login.fulfilled, (state, action) => {
             state.loggedIn = true;
@@ -118,13 +133,17 @@ export const userSlice = createSlice({
         builder.addCase(update.fulfilled, (state, action) => {
             state.data = action.payload.data;
             state.success = { message: action.payload.message };
+            state.error = null;
         }),
         builder.addCase(update.rejected, (state, action) => {
             state.error = { message: action.payload.message };
+            state.success = null;
+        }),
+        builder.addCase(deleteUser.fulfilled, (state) => {
+            state.loggedIn = false;
+            state.error = null;
         })
     }
 })
-
-// export const { create, update, deactivate } = userSlice.actions
 
 export default userSlice.reducer

@@ -5,7 +5,6 @@ import { register, update } from '../users/userSlice';
 
 const UserForm = ({ isUpdate, userData }) => {
     const dispatch = useDispatch();
-    const loggedIn = useSelector((state) => state.user.loggedIn);
     const user = useSelector((state) => state.user);
     const navigate = useNavigate();
     const [updatePassword, setUpdatePassword] = useState(false);
@@ -36,21 +35,26 @@ const UserForm = ({ isUpdate, userData }) => {
         try {
             if (isUpdate) {
                 await dispatch(update({formData, password}));
+
+                setPassword('');
+                setPasswordConfirmation('');
             } else {
                 await dispatch(register({formData, password}));
 
-                setFormData({
-                    last_name: '',
-                    first_name: '',
-                    middle_name: '',
-                    nickname: '',
-                    username: '',
-                    email: ''
-                });
-            }
+                if (user.error != null) {
+                    setFormData({
+                        last_name: '',
+                        first_name: '',
+                        middle_name: '',
+                        nickname: '',
+                        username: '',
+                        email: ''
+                    });
 
-            setPassword('');
-            setPasswordConfirmation('');
+                    setPassword('');
+                    setPasswordConfirmation('');
+                }
+            }
         } catch (error) {
             console.log(error)
         }
@@ -74,7 +78,6 @@ const UserForm = ({ isUpdate, userData }) => {
     }
 
     const handleSuccess = async () => {
-        console.log(user.success);
         if (user.success != null) {
             await setShowSuccess(true);
         
@@ -94,54 +97,51 @@ const UserForm = ({ isUpdate, userData }) => {
 
     useEffect(() => {
         handleSuccess();
+
+        if (user.loggedIn) {
+            navigate('/');
+        }
     }, [user])
 
     return (
         <div>
-            <form onSubmit={handleSubmit} className='overflow-y-scroll'>
-                {
-                    showSuccess ? 
-                        <div className="text-center flex justify-center content-center">
-                            <h1 className='text-center w-full bg-green-100 border border-2 border-green-500 text-green-800 p-3 mt-4 rounded font-bold'>{ user.success?.message }</h1>
-                        </div>
-                        : ''
-                }
+            <form onSubmit={handleSubmit}>
                 <div className='m-2 grid grid-cols-3 gap-2'>
                     <label htmlFor="last_name" className='pt-2'>Last Name:</label>
-                    <input type="text" className="w-full rounded p-2 border border-gray-400 col-span-2" 
+                    <input type="text" className="w-full rounded p-2 border border-gray-400 col-span-2" autoComplete="off"
                         name="last_name" id="last_name" value={formData.last_name} placeholder="Enter Last Name" onChange={handleChange}
                         required />
                 </div>
                 
                 <div className='m-2 grid grid-cols-3 gap-2'>
                     <label htmlFor="first_name" className='pt-2'>First Name:</label>
-                    <input type="text" className="w-full rounded p-2 border border-gray-400 col-span-2" 
+                    <input type="text" className="w-full rounded p-2 border border-gray-400 col-span-2" autoComplete="off"
                         name="first_name" id="first_name" value={formData.first_name} placeholder="Enter First Name" onChange={handleChange}
                         required />
                 </div>
                 
                 <div className='m-2 grid grid-cols-3 gap-2'>
                     <label htmlFor="middle_name" className='pt-2'>Middle Name:</label>
-                    <input type="text" className="w-full rounded p-2 border border-gray-400 col-span-2" 
+                    <input type="text" className="w-full rounded p-2 border border-gray-400 col-span-2" autoComplete="off"
                         name="middle_name" id="middle_name" value={formData.middle_name} placeholder="Enter Middle Name" onChange={handleChange} />
                 </div>
                 
                 <div className='m-2 grid grid-cols-3 gap-2'>
                     <label htmlFor="nickname" className='pt-2'>Nickname:</label>
-                    <input type="text" className="w-full rounded p-2 border border-gray-400 col-span-2" 
+                    <input type="text" className="w-full rounded p-2 border border-gray-400 col-span-2" autoComplete="off"
                         name="nickname" id="nickname" value={formData.nickname} placeholder="Enter Nickname" onChange={handleChange} />
                 </div>
                 
                 <div className='m-2 grid grid-cols-3 gap-2'>
                     <label htmlFor="username" className='pt-2'>Username:</label>
-                    <input type="text" className="w-full rounded p-2 border border-gray-400 col-span-2" 
+                    <input type="text" className="w-full rounded p-2 border border-gray-400 col-span-2" autoComplete="off"
                         name="username" id="username" value={formData.username} placeholder="Enter Username" onChange={handleChange}
                         required />
                 </div>
 
                 <div className='m-2 grid grid-cols-3 gap-2'>
                     <label htmlFor="email" className='pt-2'>Email:</label>
-                    <input type="email" className="w-full rounded p-2 border border-gray-400 col-span-2" 
+                    <input type="email" className="w-full rounded p-2 border border-gray-400 col-span-2" autoComplete="off"
                         name="email" id="email" value={formData.email} placeholder="Enter Email" onChange={handleChange}
                         required />
                 </div>
@@ -179,7 +179,7 @@ const UserForm = ({ isUpdate, userData }) => {
                 
                 
                 <div className='m-2'>
-                    <button type="submit" className='w-full bg-blue-800 text-white mt-4 p-2 rounded'>Submit</button>
+                    <button type="submit" className='w-full bg-blue-800 text-white mt-4 p-2 rounded'>Save Current Changes</button>
                 </div>
             </form>
         </div>
