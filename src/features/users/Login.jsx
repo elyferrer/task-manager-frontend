@@ -20,19 +20,17 @@ const Login = () => {
             password: password
         };
 
-        await dispatch(login(formData));
-
-        console.log(loggedIn);
-        // if (loggedIn) {
-        //     navigate('/');
-        // }
+        await dispatch(login(formData)).unwrap();
     }
+
+    useEffect(() => {
+    }, [dispatch])
 
     useEffect(() => {
         if (loggedIn) {
             navigate('/');
         }
-    }, [loggedIn, name])
+    }, [loggedIn])
 
     return (
         <div>
