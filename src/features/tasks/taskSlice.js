@@ -49,7 +49,7 @@ export const updateTask = createAsyncThunk(
       title: formData.title,
       details: formData.details,
       start_date: `${formData.start_date} ${formData.start_time}`,
-      end_date: `${formData.start_date} ${formData.end_time}`,
+      end_date: `${formData.end_date} ${formData.end_time}`,
       status: formData.status
     };
 

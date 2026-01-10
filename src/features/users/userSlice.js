@@ -6,7 +6,9 @@ const API_URL = "http://localhost:3001";
 const initialState = {
     username: localStorage.getItem('u'),
     data: {},
-    loggedIn: localStorage.getItem('l')
+    loggedIn: localStorage.getItem('l'),
+    error: null,
+    success: null
 };
 
 export const login = createAsyncThunk(
@@ -43,13 +45,13 @@ export const getUserDetails = createAsyncThunk(
 
 export const register = createAsyncThunk(
     'user/register',
-    async (formData, thunkAPI) => {
+    async ({ formData, password }, thunkAPI) => {
         try {
-            const response = await axios.post(`${API_URL}/user`, formData, { withCredentials: true });
+            const response = await axios.post(`${API_URL}/user`, { ...formData, password }, { withCredentials: true });
 
             if (response.status === 201) {
                 await axios.post(`${API_URL}/user/login`, 
-                    { username: formData.username, password: formData.password }, { withCredentials: true })
+                    { username: formData.username, password: password }, { withCredentials: true })
                 .then((response) => {
                     localStorage.setItem('u', response.data.username);
                     localStorage.setItem('l', true);
@@ -65,15 +67,14 @@ export const register = createAsyncThunk(
 
 export const update = createAsyncThunk(
     'user/update',
-    async (formData, thunkAPI) => {
-        try {
-            try {
-            const response = await axios.patch(`${API_URL}/user`, formData, { withCredentials: true });
-            
-            return response.data;
-        } catch (error) {
-            return thunkAPI.rejectWithValue(error.response.data)
+    async ({ formData, password }, thunkAPI) => {
+        if (password != '') {
+            formData = { ...formData, password };
         }
+        try {
+            const response = await axios.put(`${API_URL}/user`, formData, { withCredentials: true });
+             
+            return response.data;
         } catch (error) {
             return thunkAPI.rejectWithValue(error.response.data)
         }
@@ -95,21 +96,31 @@ export const logout = createAsyncThunk(
 export const userSlice = createSlice({
     name: 'user',
     initialState,
-    reducers: {
-    },
+    reducers: {},
     extraReducers: (builder) => {
-        builder.addCase(register.fulfilled, (state, action) => {
+        builder.addCase(register.fulfilled, (state) => {
             state.loggedIn = true;
         }),
         builder.addCase(login.fulfilled, (state, action) => {
             state.loggedIn = true;
             state.username = action.payload.username
         }),
-        builder.addCase(logout.fulfilled, (state, action) => {
+        builder.addCase(login.rejected, (state, action) => {
+            state.error = action.payload
+        }),
+        builder.addCase(logout.fulfilled, (state) => {
             state.loggedIn = false
+            state.error = null;
         }),
         builder.addCase(getUserDetails.fulfilled, (state, action) => {
             state.data = action.payload;
+        }),
+        builder.addCase(update.fulfilled, (state, action) => {
+            state.data = action.payload.data;
+            state.success = { message: action.payload.message };
+        }),
+        builder.addCase(update.rejected, (state, action) => {
+            state.error = { message: action.payload.message };
         })
     }
 })

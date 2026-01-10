@@ -16,8 +16,9 @@ const Home = () => {
     }
     
     const handleLogout = async () => {
-        await dispatch(logout())
 
+        if(confirm("Are you sure you want to logout?")) await dispatch(logout());
+       
         navigate('/login');
     }
 
@@ -29,12 +30,12 @@ const Home = () => {
 
     return (
         <div>
-            <div className={`fixed w-full h-screen bg-black bg-opacity-60 flex justify-center items-center ${showUserForm ? 'visible pointer-events-auto' : 'hidden pointer-events-none'}`}>
+            <div className={`fixed w-full h-screen bg-black bg-opacity-60 flex justify-center p-2 items-center ${showUserForm ? 'visible pointer-events-auto' : 'hidden pointer-events-none'}`}>
                 <div className='w-full sm:w-3/5 md:w-1/3 mx-auto pt-5 bg-white rounded p-3'>
                     <div className='text-center p-2'>
                         <h1 className='text-2xl'>Update My Profile</h1>
                     </div>
-                    <UserForm />
+                    <UserForm isUpdate={true} userData={user} />
                     <div>
                         <button type="button" className='w-full p-2 rounded' onClick={() => setShowUserForm(false)}>Cancel</button>
                     </div>
@@ -42,14 +43,13 @@ const Home = () => {
                 
             </div>
             <div className='w-full bg-blue-800'>
-                <div className='grid grid-cols-3 gap-2'>
-                    <div></div>
-                    <div className='text-center'>
+                <div className='grid grid-cols-2 gap-2'>
+                    <div className='px-2'>
                         <h1 className='text-2xl pt-2 text-white'>Hello, { user.nickname }</h1>
                     </div>
                     <div className='text-right'>
-                        <button onClick={() => setShowUserForm(true)} className='text-white bg-green-600 rounded px-3 py-1 m-2 w-1/4'>Profile</button>
-                        <button onClick={handleLogout} className='text-white bg-red-500 rounded px-3 py-1 m-2 w-1/4'>Logout</button>
+                        <button onClick={() => setShowUserForm(true)} className='text-white bg-green-600 rounded px-3 py-1 m-2'>Profile</button>
+                        <button onClick={handleLogout} className='text-white bg-red-500 rounded px-3 py-1 m-2'>Logout</button>
                     </div>
                 </div>
             </div>

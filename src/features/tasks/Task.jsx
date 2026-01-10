@@ -80,8 +80,8 @@ const Task = () => {
         return formattedTime;
     }
 
-    const handleDelete = (id) => {
-        dispatch(deleteTask(id));
+    const handleDelete = async (id) => {
+        if(confirm("Are you sure you want to delete this task?")) await dispatch(deleteTask(id));
     }
     
     useEffect(() => {
@@ -92,7 +92,7 @@ const Task = () => {
 
     const content = (
         <div className=''>
-            <div className={`fixed top-0 left-0 w-full h-screen bg-black bg-opacity-60 flex justify-center items-center ${showForm ? 'visible pointer-events-auto' : 'hidden pointer-events-none'}`}>
+            <div className={`fixed top-0 left-0 w-full h-screen bg-black bg-opacity-60 flex justify-center p-2 items-center ${showForm ? 'visible pointer-events-auto' : 'hidden pointer-events-none'}`}>
                 <form onSubmit={handleSubmit} className='w-96 bg-white p-3 rounded'>
                     <div className='m-2 text-center'>
                         <h1 className='text-xl'>{`${selected ? 'Update Task' : 'Create New Task'}`}</h1>
@@ -184,6 +184,9 @@ const Task = () => {
                                 let textColor = '';
                                 let bgColor = '';
                                 const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' };
+                                
+                                const endDate = new Date(task.end_date).toLocaleDateString();
+                                const isDue = stat.value !== 3 && endDate == new Date().toLocaleDateString();
 
                                 switch(stat.value) {
                                     case 1: // Open
@@ -237,6 +240,9 @@ const Task = () => {
                                         </div>
                                         <div className='text-right mt-3'>
                                             <button className='bg-red-500 w-full text-white rounded px-3 py-1 mx-2' onClick={ () => handleDelete(task._id) }>Delete</button>
+                                        </div>
+                                        <div className='text-right col-span-3'>
+                                            <span className='inline-block text-xs font-semibold px-2.5 py-0.5 rounded bg-red-100 text-red-800'>{ isDue ? 'Warning! Due Today' : ''}</span>
                                         </div>
                                     </div>
                                 )

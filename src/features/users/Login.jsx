@@ -4,13 +4,13 @@ import { login } from './userSlice';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
-    const [username, setUsername] = useState('jollycasfer')
-    const [password, setPassword] = useState('1234567890')
+    const [username, setUsername] = useState('alice123')
+    const [password, setPassword] = useState('password')
+    const [showError, setShowError] = useState(false);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const loggedIn = useSelector((state) => state.user.loggedIn);
-    const name = useSelector((state) => state.user.username);
+    const user = useSelector((state) => state.user);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -20,25 +20,61 @@ const Login = () => {
             password: password
         };
 
-        await dispatch(login(formData)).unwrap();
+        await dispatch(login(formData));
+    }
+
+    const handleError = async () => {
+        if (user.error != null) {
+            await setShowError(true);
+        
+            setTimeout(() => {
+                setShowError(false);
+            }, 5000);
+        }
     }
 
     useEffect(() => {
     }, [dispatch])
 
     useEffect(() => {
-        if (loggedIn) {
+        if (user.loggedIn) {
             navigate('/');
         }
-    }, [loggedIn])
+
+        if (user.error !== '') {
+            handleError();
+        }
+    }, [user])
 
     return (
-        <div>
-            <h1>Login</h1>
+        <div className='w-full sm:w-3/5 md:w-1/3 mx-auto pt-5 bg-blue-800 p-5 mt-3 rounded'>
+            <div className='mx-3 text-center p-5'>
+                <h3 className='text-3xl font-bold text-white'>Sign In</h3>
+            </div>
+            
             <form onSubmit={handleSubmit}>
-                <input type="text" name="username" id="username" onChange={(e) => setUsername(e.target.value)} value={username} />
-                <input type="password" name="password" id="password" onChange={(e) => setPassword(e.target.value)} value={password} />
-                <button>Login</button>
+                <div className="text-center">
+                    <input type="text" name="username" id="username" className="w-3/4 rounded p-2 border border-gray-400"
+                        onChange={(e) => setUsername(e.target.value)} value={username} required />
+                </div>
+
+                <div className="text-center">
+                    <input type="password" name="password" id="password" className="w-3/4 rounded p-2 border border-gray-400 mt-2" 
+                        onChange={(e) => setPassword(e.target.value)} value={password} required />
+                </div>
+                
+                <div className="text-center">
+                    <button type="submit" className='w-3/4 bg-blue-500 text-white mt-4 p-2 rounded'>Login</button>
+                </div>
+
+                {
+                    showError ? 
+                        <div className="text-center flex justify-center content-center">
+                            <h1 className='text-center w-3/4 bg-red-300 text-red-800 p-3 mt-4 rounded'>{ user.error?.message }</h1>
+                        </div>
+                        : ''
+                }
+                
             </form>
         </div>
     )
