@@ -52,6 +52,21 @@ const Task = () => {
         }
     }
 
+    const handleAddNewForm = () => {
+        setFormData({
+            title: '',
+            details: '',
+            start_date: '',
+            start_time: '',
+            end_date: '',
+            end_time: '',
+            status: 1
+        });
+
+        setSelected('');
+        setShowForm(true);
+    }
+
     const handleUpdateForm = (id, data) => {
         setSelected(id);
 
@@ -172,7 +187,7 @@ const Task = () => {
                     <h3 className='text-3xl font-bold'>Tasks</h3>
                 </div> */}
                 <div className='grid grid-cols-3 gap-2 m-3'>
-                    <button onClick={ () => setShowForm(true) } className='text-white bg-blue-600 p-2 rounded'>Add New Task</button>
+                    <button onClick={handleAddNewForm} className='text-white bg-blue-600 p-2 rounded'>Add New Task</button>
                 </div>
                 
                 <div className='mx-3'>

@@ -64,8 +64,6 @@ const Home = () => {
                     </div>
                     <UserForm isUpdate={true} userData={user} />
                     <div className='px-2'>
-                        <button type="button" className='w-full p-2 rounded text-white bg-red-600' 
-                            onClick={() => handleDelete()}>Delete Account</button>
                         <button type="button" className='w-full p-2 rounded' onClick={() => setShowUserForm(false)}>Cancel</button>
                     </div>
                     {

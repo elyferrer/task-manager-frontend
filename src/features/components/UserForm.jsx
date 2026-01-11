@@ -3,14 +3,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { register, update } from '../users/userSlice';
 
-const UserForm = ({ isUpdate, userData }) => {
+const UserForm = ({ isUpdate }) => {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.user);
     const navigate = useNavigate();
-    const [updatePassword, setUpdatePassword] = useState(false);
-    const [showSuccess, setShowSuccess] = useState(false);
-    const [showError, setShowError] = useState(false);
 
+    const [updatePassword, setUpdatePassword] = useState(false);
+    const [password, setPassword] = useState('');
+    const [passwordConfirmation, setPasswordConfirmation] = useState('');
     const [formData, setFormData] = useState({
         last_name: '',
         first_name: '',
@@ -19,18 +19,42 @@ const UserForm = ({ isUpdate, userData }) => {
         username: '',
         email: ''
     });
+    const [formError, setFormError] = useState({
+        username: '',
+        password: '',
+        passwordConfirmation: ''
+    });
 
-    const [password, setPassword] = useState('');
-    const [passwordConfirmation, setPasswordConfirmation] = useState('');
+    const validateFormData = () => {
+        if ((!isUpdate || updatePassword) && password != passwordConfirmation) {
+            setFormError({ ...formError, passwordConfirmation: 'Password should match with the confirm password field' });
+        }
+
+        if (formData.username.length < 8 || formData.username.length > 50) {
+            setFormError({ ...formError, username: 'Username should be between 8 and 50 characters in length' });
+        }
+
+        if ((isUpdate && updatePassword && password.length < 8) || (!isUpdate && password.length < 8)) {
+            setFormError({ ...formError, password: 'Password should be atleast 8 characters long' });
+        }
+
+        setTimeout(() => {
+            setFormError({
+                username: '',
+                password: '',
+                passwordConfirmation: ''
+            });
+        }, 10000);
+
+        if (formError.username != '' || formError.password != '' || formError.passwordConfirmation != '') {
+            return false;
+        }
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if ((!isUpdate || updatePassword) && password != passwordConfirmation) {
-            alert('Password should match with the confirm password field');
-
-            return;
-        }
+        validateFormData();
 
         try {
             if (isUpdate) {
@@ -66,40 +90,26 @@ const UserForm = ({ isUpdate, userData }) => {
         setFormData((prevState) => ({ ...prevState, [name]: value }));
     };
 
-    const populateUpdate = () => {
-        setFormData({
-            last_name: userData.last_name,
-            first_name: userData.first_name,
-            middle_name: userData.middle_name,
-            nickname: userData.nickname,
-            username: userData.username,
-            email: userData.email
+    const populateUpdate = async () => {
+        await setFormData({
+            last_name: user.data.last_name,
+            first_name: user.data.first_name,
+            middle_name: user.data.middle_name,
+            nickname: user.data.nickname,
+            username: user.data.username,
+            email: user.data.email
         });
     }
-
-    const handleSuccess = async () => {
-        if (user.success != null) {
-            await setShowSuccess(true);
-        
-            setTimeout(() => {
-                setShowSuccess(false);
-            }, 5000);
-        }
-    }
-
-    useEffect(() => {
-        if (isUpdate) {
-            populateUpdate();
-        }
-    }, [isUpdate, userData])
 
     useEffect(() => {}, [dispatch])
 
     useEffect(() => {
-        handleSuccess();
-
         if (user.loggedIn) {
             navigate('/');
+        }
+
+        if (isUpdate && user.data) {
+            populateUpdate();
         }
     }, [user])
 
@@ -137,6 +147,7 @@ const UserForm = ({ isUpdate, userData }) => {
                     <input type="text" className="w-full rounded p-2 border border-gray-400 col-span-2" autoComplete="off"
                         name="username" id="username" value={formData.username} placeholder="Enter Username" onChange={handleChange}
                         required />
+                    {formError.username ? <span className='text-right col-span-3 text-red-500 text-sm'>{ formError.username }</span> : ''}
                 </div>
 
                 <div className='m-2 grid grid-cols-3 gap-2'>
@@ -166,6 +177,7 @@ const UserForm = ({ isUpdate, userData }) => {
                                 <input type="password" className="w-full rounded p-2 border border-gray-400 col-span-2" 
                                     name="password" id="password" value={password} placeholder="Enter Password" onChange={(e) => setPassword(e.target.value)}
                                     required />
+                                {formError.password ? <span className='text-right col-span-3 text-red-500 text-sm'>{ formError.password }</span> : ''}
                             </div>
                             
                             <div className='m-2 grid grid-cols-3 gap-2'>
@@ -173,10 +185,10 @@ const UserForm = ({ isUpdate, userData }) => {
                                 <input type="password" className="w-full rounded p-2 border border-gray-400 col-span-2" 
                                     name="passwordConfirmation" id="passwordConfirmation" value={passwordConfirmation} placeholder="Confirm Password" onChange={(e) => setPasswordConfirmation(e.target.value)}
                                     required />
+                                {formError.passwordConfirmation ? <span className='text-right col-span-3 text-red-500 text-sm'>{ formError.passwordConfirmation }</span> : ''}
                             </div>
                         </> : ''
                 }
-                
                 
                 <div className='m-2'>
                     <button type="submit" className='w-full bg-blue-800 text-white mt-4 p-2 rounded'>Save Current Changes</button>
