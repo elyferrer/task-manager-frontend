@@ -11,6 +11,7 @@ const UserForm = ({ isUpdate }) => {
     const [updatePassword, setUpdatePassword] = useState(false);
     const [password, setPassword] = useState('');
     const [passwordConfirmation, setPasswordConfirmation] = useState('');
+    const [disableSave, setDisableSave] = useState(false);
     const [formData, setFormData] = useState({
         last_name: '',
         first_name: '',
@@ -19,42 +20,47 @@ const UserForm = ({ isUpdate }) => {
         username: '',
         email: ''
     });
+    
     const [formError, setFormError] = useState({
         username: '',
         password: '',
         passwordConfirmation: ''
     });
 
-    const validateFormData = () => {
-        if ((!isUpdate || updatePassword) && password != passwordConfirmation) {
-            setFormError({ ...formError, passwordConfirmation: 'Password should match with the confirm password field' });
-        }
-
-        if (formData.username.length < 8 || formData.username.length > 50) {
+    const handleUsernameChange = (value) => {
+        if (value.length < 8 || value.length > 50) {
             setFormError({ ...formError, username: 'Username should be between 8 and 50 characters in length' });
+            setDisableSave(true);
+        } else {
+            setFormError({ ...formError, username: '' });
+            setDisableSave(false);
         }
+    }
 
-        if ((isUpdate && updatePassword && password.length < 8) || (!isUpdate && password.length < 8)) {
+    const handlePasswordChange = (value) => {
+        if ((isUpdate && updatePassword && value.length < 8) || (!isUpdate && value.length < 8)) {
             setFormError({ ...formError, password: 'Password should be atleast 8 characters long' });
+            setDisableSave(true);
+        } else {
+            setFormError({ ...formError, password: '' });
+            setDisableSave(false);
         }
+        setPassword(value);
+    }
 
-        setTimeout(() => {
-            setFormError({
-                username: '',
-                password: '',
-                passwordConfirmation: ''
-            });
-        }, 10000);
-
-        if (formError.username != '' || formError.password != '' || formError.passwordConfirmation != '') {
-            return false;
+    const handlePasswordConfirmChange = (value) => {
+        if ((!isUpdate || updatePassword) && password != value) {
+            setFormError({ ...formError, passwordConfirmation: 'Password should match with the confirm password field' });
+            setDisableSave(true);
+        } else {
+            setFormError({ ...formError, passwordConfirmation: '' });
+            setDisableSave(false);
         }
+        setPasswordConfirmation(value);
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        validateFormData();
 
         try {
             if (isUpdate) {
@@ -88,6 +94,8 @@ const UserForm = ({ isUpdate }) => {
         e.preventDefault();
         const { name, value } = e.target;
         setFormData((prevState) => ({ ...prevState, [name]: value }));
+        if (name === 'username') handleUsernameChange(value);
+        
     };
 
     const populateUpdate = async () => {
@@ -175,23 +183,26 @@ const UserForm = ({ isUpdate }) => {
                             <div className='m-2 grid grid-cols-3 gap-2'>
                                 <label htmlFor="password" className='pt-2'>Password:</label>
                                 <input type="password" className="w-full rounded p-2 border border-gray-400 col-span-2" 
-                                    name="password" id="password" value={password} placeholder="Enter Password" onChange={(e) => setPassword(e.target.value)}
-                                    required />
+                                    name="password" id="password" value={password} placeholder="Enter Password" 
+                                    onChange={(e) => handlePasswordChange(e.target.value)} required />
                                 {formError.password ? <span className='text-right col-span-3 text-red-500 text-sm'>{ formError.password }</span> : ''}
                             </div>
                             
                             <div className='m-2 grid grid-cols-3 gap-2'>
                                 <label htmlFor="passwordConfirmation" className='pt-2'>Confirm Password:</label>
                                 <input type="password" className="w-full rounded p-2 border border-gray-400 col-span-2" 
-                                    name="passwordConfirmation" id="passwordConfirmation" value={passwordConfirmation} placeholder="Confirm Password" onChange={(e) => setPasswordConfirmation(e.target.value)}
-                                    required />
+                                    name="passwordConfirmation" id="passwordConfirmation" value={passwordConfirmation} placeholder="Confirm Password" 
+                                    onChange={(e) => handlePasswordConfirmChange(e.target.value)} required />
                                 {formError.passwordConfirmation ? <span className='text-right col-span-3 text-red-500 text-sm'>{ formError.passwordConfirmation }</span> : ''}
                             </div>
                         </> : ''
                 }
                 
                 <div className='m-2'>
-                    <button type="submit" className='w-full bg-blue-800 text-white mt-4 p-2 rounded'>Save Current Changes</button>
+                    <button type="submit" 
+                        className={`w-full bg-blue-800 text-white mt-4 p-2 rounded ${disableSave ? 'opacity-50 pointer-events-none' : 'opacity-100 pointer-events-auto'}`}>
+                            Save Changes
+                    </button>
                 </div>
             </form>
         </div>
